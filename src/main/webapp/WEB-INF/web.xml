@@ -4,4 +4,13 @@
 
 <web-app>
   <display-name>Archetype Created Web Application</display-name>
+
+  <servlet>
+    <servlet-name>ItemServlet</servlet-name>
+    <servlet-class>ru.job4j.todo.servlet.ItemServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ItemServlet</servlet-name>
+    <url-pattern>/items</url-pattern>
+  </servlet-mapping>
 </web-app>
