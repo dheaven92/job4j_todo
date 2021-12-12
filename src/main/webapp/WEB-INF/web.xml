@@ -13,4 +13,14 @@
     <servlet-name>ItemServlet</servlet-name>
     <url-pattern>/items</url-pattern>
   </servlet-mapping>
+
+  <servlet>
+    <servlet-name>ItemUpdateServlet</servlet-name>
+    <servlet-class>ru.job4j.todo.servlet.ItemUpdateServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ItemUpdateServlet</servlet-name>
+    <url-pattern>/items/update</url-pattern>
+  </servlet-mapping>
+
 </web-app>

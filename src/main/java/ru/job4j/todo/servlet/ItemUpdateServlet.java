@@ -11,38 +11,23 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collection;
 
-public class ItemServlet extends HttpServlet {
+public class ItemUpdateServlet extends HttpServlet {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ItemServlet.class.getName());
-
-    private ObjectMapper objectMapper;
-
-    @Override
-    public void init() {
-        objectMapper = new ObjectMapper();
-    }
-
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Collection<Item> items = HbmStore.instanceOf().findAllItems();
-        String json = objectMapper.writeValueAsString(items);
-        resp.setContentType("application/json; charset=utf-8");
-        resp.getWriter().write(json);
-    }
+    private static final Logger LOG = LoggerFactory.getLogger(ItemUpdateServlet.class.getName());
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
+            ObjectMapper objectMapper = new ObjectMapper();
             Item item = objectMapper.readValue(req.getReader().readLine(), Item.class);
-            Item itemInDb = HbmStore.instanceOf().createItem(item.getDescription());
+            Item itemInDb = HbmStore.instanceOf().updateItem(item.getId());
             String json = objectMapper.writeValueAsString(itemInDb);
             resp.setContentType("application/json; charset=utf-8");
             resp.getWriter().write(json);
         } catch (Exception e) {
             e.printStackTrace();
-            LOG.error("Could not save an item", e);
+            LOG.error("Could not update an item", e);
             resp.setContentType("application/json; charset=utf-8");
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().write(e.getMessage());

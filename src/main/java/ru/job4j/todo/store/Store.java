@@ -8,5 +8,7 @@ public interface Store {
 
     List<Item> findAllItems();
 
-    Item saveItem(Item item);
+    Item createItem(String description);
+
+    Item updateItem(int id);
 }

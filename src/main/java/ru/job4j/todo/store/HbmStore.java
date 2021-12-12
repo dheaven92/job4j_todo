@@ -19,6 +19,14 @@ public class HbmStore implements Store {
             .buildMetadata()
             .buildSessionFactory();
 
+    private static final class HbmStoreHolder {
+        private static final Store INSTANCE = new HbmStore();
+    }
+
+    public static Store instanceOf() {
+        return HbmStoreHolder.INSTANCE;
+    }
+
     @Override
     public List<Item> findAllItems() {
         Session session = sessionFactory.openSession();
@@ -38,20 +46,11 @@ public class HbmStore implements Store {
     }
 
     @Override
-    public Item saveItem(Item item) {
-        try {
-            return item.getId() != null
-                    ? updateItem(item)
-                    : createItem(item);
-        } catch (Exception e) {
-            throw new IllegalStateException("Could not create a record in DB", e);
-        }
-    }
-
-    private Item createItem(Item item) {
+    public Item createItem(String description) {
         Session session = sessionFactory.openSession();
         try {
             session.beginTransaction();
+            Item item = new Item(description);
             int id = (int) session.save(item);
             item.setId(id);
             session.getTransaction().commit();
@@ -59,23 +58,29 @@ public class HbmStore implements Store {
             return item;
         } catch (Exception e) {
             session.getTransaction().rollback();
-            throw e;
+            throw new IllegalStateException("Could not create a record in DB", e);
         } finally {
             session.close();
         }
     }
 
-    private Item updateItem(Item item) {
+    @Override
+    public Item updateItem(int id) {
         Session session = sessionFactory.openSession();
         try {
             session.beginTransaction();
+            Item item = session.get(Item.class, id);
+            if (item == null) {
+                throw new IllegalStateException("Could not find a record in DB");
+            }
+            item.setDone(!item.isDone());
             session.update(item);
             session.getTransaction().commit();
             session.close();
             return item;
         } catch (Exception e) {
             session.getTransaction().rollback();
-            throw e;
+            throw new IllegalStateException("Could not update a record in DB", e);
         } finally {
             session.close();
         }

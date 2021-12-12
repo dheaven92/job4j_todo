@@ -12,7 +12,7 @@ public class Item {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private int id;
 
     private String description;
 
@@ -24,6 +24,14 @@ public class Item {
 
     @UpdateTimestamp
     private Timestamp updated;
+
+    public Item() {
+
+    }
+
+    public Item(String description) {
+        this.description = description;
+    }
 
     public Integer getId() {
         return id;
