@@ -48,4 +48,21 @@ public class ItemServlet extends HttpServlet {
             resp.getWriter().write(e.getMessage());
         }
     }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            Item item = objectMapper.readValue(req.getReader().readLine(), Item.class);
+            Item itemInDb = HbmStore.instanceOf().updateItem(item.getId());
+            String json = objectMapper.writeValueAsString(itemInDb);
+            resp.setContentType("application/json; charset=utf-8");
+            resp.getWriter().write(json);
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOG.error("Could not update an item", e);
+            resp.setContentType("application/json; charset=utf-8");
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write(e.getMessage());
+        }
+    }
 }

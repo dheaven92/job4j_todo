@@ -71,8 +71,8 @@ const setItemsToggable = () => {
         const id = $(this).attr('data-id');
 
         $.ajax({
-            type: 'POST',
-            url: `${window.location.origin}/todo/items/update`,
+            type: 'PUT',
+            url: `${window.location.origin}/todo/items`,
             data: JSON.stringify({
                 id
             }),
