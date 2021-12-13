@@ -2,12 +2,17 @@ package ru.job4j.todo.store;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.query.Query;
 import ru.job4j.todo.model.Item;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.function.Function;
 
 public class HbmStore implements Store {
 
@@ -29,58 +34,51 @@ public class HbmStore implements Store {
 
     @Override
     public List<Item> findAllItems() {
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
-        try {
-            List items = session.createQuery(
-                    "from ru.job4j.todo.model.Item item order by item.created desc "
-            ).list();
-            session.getTransaction().commit();
-            return items;
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-            throw e;
-        } finally {
-            session.close();
-        }
+        return executeTransaction(session ->
+                session.createQuery("from ru.job4j.todo.model.Item item order by item.created desc ").list());
     }
 
     @Override
     public Item createItem(String description) {
-        Session session = sessionFactory.openSession();
-        try {
-            session.beginTransaction();
-            Item item = new Item(description);
-            int id = (int) session.save(item);
-            item.setId(id);
-            session.getTransaction().commit();
-            session.close();
-            return item;
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-            throw new IllegalStateException("Could not create a record in DB", e);
-        } finally {
-            session.close();
-        }
+        Item item = new Item(description);
+        int id = (int) executeTransaction(session -> session.save(item));
+        item.setId(id);
+        return item;
     }
 
     @Override
     public Item updateItem(int id) {
-        Session session = sessionFactory.openSession();
+        Item item = executeTransaction(session -> session.get(Item.class, id));
+        if (item == null) {
+            throw new IllegalStateException("Could not find a record in DB");
+        }
+        item.setDone(!item.isDone());
+        item.setUpdated(Timestamp.valueOf(LocalDateTime.now()));
+        executeTransaction(session -> {
+            Query query = session.createQuery(
+                    "UPDATE Item SET "
+                            + "done = :done, "
+                            + "updated = :updated "
+                            + "WHERE id = :id"
+            );
+            query.setParameter("id", item.getId());
+            query.setParameter("done", item.isDone());
+            query.setParameter("updated", item.getUpdated());
+            return query.executeUpdate() > 0;
+        });
+        return item;
+    }
+
+    private <T> T executeTransaction(final Function<Session, T> command) {
+        final Session session = sessionFactory.openSession();
+        final Transaction transaction = session.beginTransaction();
         try {
-            session.beginTransaction();
-            Item item = session.get(Item.class, id);
-            if (item == null) {
-                throw new IllegalStateException("Could not find a record in DB");
-            }
-            item.setDone(!item.isDone());
-            session.update(item);
-            session.getTransaction().commit();
-            session.close();
-            return item;
-        } catch (Exception e) {
+            T rsl = command.apply(session);
+            transaction.commit();
+            return rsl;
+        } catch (final Exception e) {
             session.getTransaction().rollback();
-            throw new IllegalStateException("Could not update a record in DB", e);
+            throw e;
         } finally {
             session.close();
         }
