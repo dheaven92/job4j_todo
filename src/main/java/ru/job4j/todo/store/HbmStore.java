@@ -8,6 +8,7 @@ import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.query.Query;
 import ru.job4j.todo.model.Item;
+import ru.job4j.todo.model.User;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -39,8 +40,7 @@ public class HbmStore implements Store {
     }
 
     @Override
-    public Item createItem(String description) {
-        Item item = new Item(description);
+    public Item createItem(Item item) {
         int id = (int) executeTransaction(session -> session.save(item));
         item.setId(id);
         return item;
@@ -67,6 +67,24 @@ public class HbmStore implements Store {
             return query.executeUpdate() > 0;
         });
         return item;
+    }
+
+    @Override
+    public User createUser(User user) {
+        int id = (int) executeTransaction(session -> session.save(user));
+        user.setId(id);
+        return user;
+    }
+
+    @Override
+    public User findUserByEmail(String email) {
+        return executeTransaction(session -> {
+           Query<User> query = session.createQuery("from User user where email = :email");
+           query.setParameter("email", email);
+           return query.stream()
+                   .findFirst()
+                   .orElse(null);
+        });
     }
 
     private <T> T executeTransaction(final Function<Session, T> command) {

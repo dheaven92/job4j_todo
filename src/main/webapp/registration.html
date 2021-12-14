@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Todo | Регистрация</title>
+</head>
+<body>
+<div class="container">
+    <div class="row pt-3 justify-content-center">
+        <div class="col-lg-4 col-md-12">
+            <div class="card card-white">
+                <div class="card-header">
+                    Регистрация
+                </div>
+                <div class="card-body">
+                    <div id="error" class="alert alert-danger" style="display: none"></div>
+                    <form id="form">
+                        <div class="form-group">
+                            <input class="form-control" type="text" name="name" placeholder="Имя" required>
+                        </div>
+                        <div class="form-group">
+                            <input class="form-control"  type="email" name="email" placeholder="Email" required>
+                        </div>
+                        <div class="form-group">
+                            <input class="form-control"  type="password" name="password" placeholder="Пароль" required>
+                        </div>
+                        <button class="btn btn-primary btn-block" type="submit">Зарегистрироваться</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<!-- Popper JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- Custom script -->
+<script>
+    $("#form").submit(function (e) {
+        e.preventDefault();
+
+        const name = $(this).find("input[name='name']").val();
+        const email = $(this).find("input[name='email']").val();
+        const password = $(this).find("input[name='password']").val();
+
+        if (name !== undefined && email !== undefined && password !== undefined) {
+            $.ajax({
+                type: 'POST',
+                url: `${window.location.origin}/todo/register`,
+                data: JSON.stringify({
+                    name,
+                    email,
+                    password
+                }),
+                dataType: 'json'
+            }).done(user => {
+                window.location.href = `${window.location.origin}/todo`;
+            }).fail(err => {
+                $("#error").text(err.responseText).show();
+            });
+        }
+    });
+</script>
+</body>
+</html>

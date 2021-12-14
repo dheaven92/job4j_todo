@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.job4j.todo.model.Item;
+import ru.job4j.todo.model.User;
 import ru.job4j.todo.store.HbmStore;
 
 import javax.servlet.ServletException;
@@ -36,7 +37,9 @@ public class ItemServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             Item item = objectMapper.readValue(req.getReader().readLine(), Item.class);
-            Item itemInDb = HbmStore.instanceOf().createItem(item.getDescription());
+            User user = (User) req.getSession().getAttribute("user");
+            item.setUser(user);
+            Item itemInDb = HbmStore.instanceOf().createItem(item);
             String json = objectMapper.writeValueAsString(itemInDb);
             resp.setContentType("application/json; charset=utf-8");
             resp.getWriter().write(json);

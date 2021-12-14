@@ -25,12 +25,17 @@ public class Item {
     @UpdateTimestamp
     private Timestamp updated;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     public Item() {
 
     }
 
-    public Item(String description) {
+    public Item(String description, User user) {
         this.description = description;
+        this.user = user;
     }
 
     public Integer getId() {
@@ -73,12 +78,21 @@ public class Item {
         this.updated = updated;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     @Override
     public String toString() {
         return "Item{"
                 + "id=" + id
                 + ", description='" + description + '\''
                 + ", done=" + done
+                + ", user=" + user
                 + ", created=" + created
                 + ", updated=" + updated
                 + '}';

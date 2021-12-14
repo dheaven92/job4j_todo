@@ -18,6 +18,11 @@ body{
     background: #f7f7f7
 }
 
+.todo-list .todo-item .todo-item-author {
+    float: right;
+    color: #6C7588;
+}
+
 .todo-list.only-active .todo-item.complete {
     display: none
 }

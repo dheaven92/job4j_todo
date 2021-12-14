@@ -13,7 +13,14 @@
 </head>
 <body>
 <div class="container">
-    <div class="row pt-3">
+    <div class="row">
+        <ul class="nav">
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="logout()">Выйти</a>
+            </li>
+        </ul>
+    </div>
+    <div class="row">
         <div class="col-md-12">
             <div class="card card-white">
                 <div class="card-body">
@@ -21,9 +28,12 @@
                         <input type="text" class="form-control add-task" placeholder="Добавить новое задание...">
                     </form>
                     <ul class="nav nav-pills todo-nav">
-                        <li role="presentation" class="nav-item all-task active"><a href="#" class="nav-link">Все</a></li>
-                        <li role="presentation" class="nav-item active-task"><a href="#" class="nav-link">Активные</a></li>
-                        <li role="presentation" class="nav-item completed-task"><a href="#" class="nav-link">Выполненные</a></li>
+                        <li role="presentation" class="nav-item all-task active"><a href="#" class="nav-link">Все</a>
+                        </li>
+                        <li role="presentation" class="nav-item active-task"><a href="#" class="nav-link">Активные</a>
+                        </li>
+                        <li role="presentation" class="nav-item completed-task"><a href="#"
+                                                                                   class="nav-link">Выполненные</a></li>
                     </ul>
                     <div class="todo-list">
                     </div>
