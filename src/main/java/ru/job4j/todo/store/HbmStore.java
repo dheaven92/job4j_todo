@@ -81,9 +81,7 @@ public class HbmStore implements Store {
         return executeTransaction(session -> {
            Query<User> query = session.createQuery("from User user where email = :email");
            query.setParameter("email", email);
-           return query.stream()
-                   .findFirst()
-                   .orElse(null);
+           return query.uniqueResult();
         });
     }
 
