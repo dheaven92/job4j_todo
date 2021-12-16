@@ -1,43 +1,46 @@
+const categoriesSelect = $('#categories');
+
+categoriesSelect.selectpicker({
+    noneSelectedText: 'Выберите категорию',
+    width: 'fit',
+    style: '',
+    styleBase: 'form-control'
+});
+
 $(document).ready(function () {
     setNavigation();
+    loadCategories();
     loadItems();
     setFormSubmittable();
 });
 
 const setFormSubmittable = () => {
-    $(".add-task").keypress(function (e) {
-        if ((e.which == 13) && (!$(this).val().length == 0)) {
-            const description = $(this).val();
+    $("#form").submit(e => {
+        e.preventDefault();
 
-            $.ajax({
-                type: 'POST',
-                url: `${window.location.origin}/todo/items`,
-                data: JSON.stringify({
-                    description
-                }),
-                dataType: 'json'
-            }).done(item => {
-                $('.todo-list').prepend(
-                    `
-                       <div class="todo-item">
-                           <div class="checker">
-                                <span>
-                                    <input type="checkbox" data-id=${item.id}>
-                                </span>
-                            </div>
-                            <span>${item.description}</span>
-                            <span class="todo-item-author">автор: ${item.user.name}</span>
-                        </div>
-                       </div>
-                   `);
-                $(this).val('');
-                setItemsToggable();
-            }).fail(err => {
-                console.log(err);
-            });
-        } else if (e.which == 13) {
-            alert('Введите название задания');
+        const descriptionInput = $('#description');
+        const selectedIds = categoriesSelect.val();
+
+        if (descriptionInput.val() === undefined || selectedIds.length === 0) {
+            alert('Введите название задания и выберите категорию');
         }
+
+        $.ajax({
+            type: 'POST',
+            url: `${window.location.origin}/todo/items`,
+            data: JSON.stringify({
+                description: descriptionInput.val(),
+                categoryIds: selectedIds.map(id => +id)
+            }),
+            dataType: 'json'
+        }).done(item => {
+            $('.todo-list').prepend(getNewItem(item));
+            descriptionInput.val('');
+            categoriesSelect.val('default').selectpicker("refresh");
+            setItemsToggable();
+        }).fail(err => {
+            console.log(err);
+        });
     });
 }
 
@@ -48,19 +51,7 @@ const loadItems = () => {
         dataType: 'json'
     }).done(items => {
         for (const item of items) {
-            $('.todo-list').append(
-                `
-                       <div class="todo-item ${item.done ? 'complete' : ''}">
-                           <div class="checker">
-                                <span>
-                                    <input type="checkbox" ${item.done ? 'checked' : ''} data-id=${item.id}>
-                                </span>
-                            </div>
-                            <span>${item.description}</span>
-                            <span class="todo-item-author">автор: ${item.user.name}</span>
-                        </div>
-                       </div>
-                   `);
+            $('.todo-list').append(getNewItem(item));
         }
         setItemsToggable();
     }).fail(function (err) {
@@ -125,4 +116,40 @@ const logout = () => {
     }).fail(err => {
         console.log(err);
     });
+}
+
+const loadCategories = () => {
+    $.ajax({
+        type: 'GET',
+        url: `${window.location.origin}/todo/categories`,
+        dataType: 'json'
+    }).done(categories => {
+        console.log(categories)
+        for (let category of categories) {
+            categoriesSelect.append(`<option value=${category.id}>${category.name}</option>`)
+        }
+        categoriesSelect.selectpicker('refresh');
+    }).fail(function (err) {
+        console.log(err);
+    });
+}
+
+const getNewItem = (item) => {
+    console.log(item)
+    return `
+       <div class="todo-item ${item.done ? 'complete' : ''}">
+           <div class="todo-item-header">
+               <div class="checker">
+                    <span>
+                        <input type="checkbox" ${item.done ? 'checked' : ''} data-id=${item.id}>
+                    </span>
+                </div>
+                <span class="todo-item-description">${item.description}</span>
+                <span class="todo-item-author">автор: ${item.user.name}</span>
+            </div>
+            <div class="todo-item-footer">
+                ${item.categories.map(category => category.name).join(', ')}
+            </div>
+       </div>
+    `;
 }

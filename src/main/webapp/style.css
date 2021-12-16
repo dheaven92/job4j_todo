@@ -39,7 +39,7 @@ body{
     display: block
 }
 
-.todo-list .todo-item.complete span {
+.todo-list .todo-item.complete span.todo-item-description {
     text-decoration: line-through
 }
 
@@ -54,6 +54,12 @@ body{
 
 .todo-item:hover .remove-todo-item {
     visibility: visible
+}
+
+.todo-item .todo-item-footer {
+    margin-top: 5px;
+    font-size: 13px;
+    color: #6C7588;
 }
 
 div.checker {
@@ -103,4 +109,8 @@ div.button, div.checker, div.radio, div.selector, div.uploader {
     background: #fff;
     border-radius: calc(.15rem - 1px);
     box-shadow: 0 1px 15px rgba(0,0,0,0.04), 0 1px 6px rgba(0,0,0,0.04);
+}
+
+.bootstrap-select:not(.input-group-btn), .bootstrap-select[class*=col-] {
+    display: block;
 }

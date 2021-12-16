@@ -7,6 +7,7 @@ import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.query.Query;
+import ru.job4j.todo.model.Category;
 import ru.job4j.todo.model.Item;
 import ru.job4j.todo.model.User;
 
@@ -36,19 +37,30 @@ public class HbmStore implements Store {
     @Override
     public List<Item> findAllItems() {
         return executeTransaction(session ->
-                session.createQuery("from ru.job4j.todo.model.Item item order by item.created desc ").list());
+                session.createQuery("SELECT DISTINCT item FROM Item item "
+                        + "JOIN FETCH item.categories ORDER BY item.created DESC").list());
     }
 
     @Override
-    public Item createItem(Item item) {
-        int id = (int) executeTransaction(session -> session.save(item));
+    public Item createItem(Item item, List<Integer> categoryIds) {
+        int id = (int) executeTransaction(session -> {
+            for (Integer categoryId : categoryIds) {
+                Category category = session.get(Category.class, categoryId);
+                item.addCategory(category);
+            }
+            return session.save(item);
+        });
         item.setId(id);
         return item;
     }
 
     @Override
     public Item updateItem(int id) {
-        Item item = executeTransaction(session -> session.get(Item.class, id));
+        Item item = executeTransaction(session -> {
+            Query<Item> query = session.createQuery("FROM Item item JOIN FETCH item.categories WHERE item.id = :id");
+            query.setParameter("id", id);
+            return query.uniqueResult();
+        });
         if (item == null) {
             throw new IllegalStateException("Could not find a record in DB");
         }
@@ -56,7 +68,7 @@ public class HbmStore implements Store {
         item.setUpdated(Timestamp.valueOf(LocalDateTime.now()));
         executeTransaction(session -> {
             Query query = session.createQuery(
-                    "UPDATE Item SET "
+                    "UPDATE Item item SET "
                             + "done = :done, "
                             + "updated = :updated "
                             + "WHERE id = :id"
@@ -83,6 +95,12 @@ public class HbmStore implements Store {
            query.setParameter("email", email);
            return query.uniqueResult();
         });
+    }
+
+    @Override
+    public List<Category> findAllCategories() {
+        return executeTransaction(session ->
+                session.createQuery("from Category category order by category.name asc").list());
     }
 
     private <T> T executeTransaction(final Function<Session, T> command) {

@@ -15,3 +15,18 @@ CREATE TABLE item (
     created     TIMESTAMP DEFAULT now(),
     updated     TIMESTAMP DEFAULT now()
 );
+
+CREATE TABLE category (
+    id   SERIAL PRIMARY KEY,
+    name TEXT
+);
+
+CREATE TABLE item_category (
+    item_id     INT REFERENCES item (id),
+    categories_id INT REFERENCES category (id),
+    PRIMARY KEY (item_id, categories_id)
+);
+
+INSERT INTO category (name) VALUES ('Дом');
+INSERT INTO category (name) VALUES ('Работа');
+INSERT INTO category (name) VALUES ('Учеба');
