@@ -26,6 +26,10 @@ public class HbmStore implements Store {
             .buildMetadata()
             .buildSessionFactory();
 
+    private HbmStore() {
+
+    }
+
     private static final class HbmStoreHolder {
         private static final Store INSTANCE = new HbmStore();
     }
