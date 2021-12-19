@@ -4,7 +4,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,10 +22,12 @@ public class Item {
 
     @CreationTimestamp
     @Column(updatable = false)
-    private Timestamp created;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date created;
 
     @UpdateTimestamp
-    private Timestamp updated;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updated;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -68,19 +70,19 @@ public class Item {
         this.done = done;
     }
 
-    public Timestamp getCreated() {
+    public Date getCreated() {
         return created;
     }
 
-    public void setCreated(Timestamp created) {
+    public void setCreated(Date created) {
         this.created = created;
     }
 
-    public Timestamp getUpdated() {
+    public Date getUpdated() {
         return updated;
     }
 
-    public void setUpdated(Timestamp updated) {
+    public void setUpdated(Date updated) {
         this.updated = updated;
     }
 
